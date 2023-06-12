@@ -1,7 +1,12 @@
-package tudai.pro3.colecciones;
+package tudai.prog3.colecciones;
 
 import java.util.Iterator;
 
+/**
+ * 
+ * @author Lauge Guillermina, Gentil Ricardo
+ *
+ */
 public interface Grafo<T> {
 
 	// Agrega un vertice
@@ -48,5 +53,8 @@ public interface Grafo<T> {
 
 	// Imprimir el grafo
 	public void imprimir();
+
+	// Imprimir el grafo
+	public void imprimirPonderado();
 
 }

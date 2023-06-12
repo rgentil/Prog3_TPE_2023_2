@@ -1,4 +1,4 @@
-package tudai.pro3.colecciones;
+package tudai.prog3.colecciones;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -6,6 +6,11 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+/**
+ * 
+ * @author Lauge Guillermina, Gentil Ricardo
+ *
+ */
 public class GrafoDirigido<T> implements Grafo<T> {
 
 	private HashMap<Integer, HashSet<Arco<T>>> vertices;
@@ -102,7 +107,7 @@ public class GrafoDirigido<T> implements Grafo<T> {
 			}
 			return adyacentes.iterator();
 		}
-		return null;
+		return new ArrayList<Integer>().iterator();
 	}
 
 	@Override
@@ -130,6 +135,20 @@ public class GrafoDirigido<T> implements Grafo<T> {
 			for (Iterator<Integer> iteratorA = this.obtenerAdyacentes(vertice); iteratorA.hasNext();) {
 				Integer ady = (Integer) iteratorA.next();
 				System.out.print(ady + " ");
+			}
+			System.out.println();
+		}
+	}
+
+	@Override
+	public void imprimirPonderado() {
+		System.out.println("Grafo ponderado");
+		for (Iterator<Integer> iteratorV = this.obtenerVertices(); iteratorV.hasNext();) {
+			Integer vertice = (Integer) iteratorV.next();
+			System.out.print(vertice + " -> ");
+			for (Iterator<Arco<T>> iteratorA = this.obtenerArcos(vertice); iteratorA.hasNext();) {
+				Arco<T> ady = (Arco<T>) iteratorA.next();
+				System.out.print(ady.getVerticeDestino() + "(" + ady.getEtiqueta() + ") ");
 			}
 			System.out.println();
 		}
