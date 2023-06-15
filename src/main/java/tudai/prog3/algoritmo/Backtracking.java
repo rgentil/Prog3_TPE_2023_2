@@ -1,12 +1,10 @@
 package tudai.prog3.algoritmo;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import tudai.prog3.colecciones.Arco;
-import tudai.prog3.colecciones.Grafo;
-import tudai.prog3.util.UnionFind;
+import tudai.prog3.colecciones.Estado;
+import tudai.prog3.colecciones.Tunel;
 
 /**
  * 
@@ -14,84 +12,76 @@ import tudai.prog3.util.UnionFind;
  *
  */
 public class Backtracking {
-	private Grafo<Integer> red;
-	private int cant_vertices;
-	private List<String> camino_final;
 	private int km;
+	private int iteraciones;
 
-	public Backtracking(Grafo<Integer> red) {
-		this.red = red;
-		this.cant_vertices = red.cantidadVertices();
+	public Backtracking() {
 	}
 
-	public List<String> back() {
-		this.camino_final = new ArrayList<String>();
+	public List<Tunel> back(Estado estado) {
+		this.iteraciones = 0;
 		this.km = Integer.MAX_VALUE;
-		for (Iterator<Integer> it = red.obtenerVertices(); it.hasNext();) {
-			UnionFind uf = new UnionFind(cant_vertices + 1);
-			List<Integer> visitados = new ArrayList<Integer>();
-			List<String> camino = new ArrayList<String>();
-			Integer vertice = it.next();
-			_back(vertice, uf, visitados, camino, 0);
-		}
-		return camino_final;
+
+		List<Tunel> conexion_final = new ArrayList<Tunel>();
+		List<Tunel> conexion_parcial = new ArrayList<Tunel>();
+
+		_back(estado, conexion_parcial, conexion_final, 0);
+
+		return conexion_final;
 	}
 
-	private void _back(int vertice_actual, UnionFind uf, List<Integer> visitados, List<String> camino,
-			int km_parcial) {
+	private void _back(Estado estado, List<Tunel> conexion_parcial, List<Tunel> conexion_final, int km_parcial) {
+		iteraciones++;
 
-		visitados.add(vertice_actual);
-
-		if (visitados.size() == cant_vertices) {
-			if (todosLosVerticesEstanConectados(uf)) {
-				if (km_parcial <= this.km) {
-					camino_final.clear();
-					camino_final.addAll(camino);
-					km = km_parcial;
+		if (estado.sinTuneles()) {
+			if (estado.sinEstaciones()) {
+				if (estado.coneccionCompleta()) {
+					if (km_parcial <= this.km) {
+						conexion_final.clear();
+						conexion_final.addAll(conexion_parcial);
+						km = km_parcial;
+					}
 				}
 			}
-		}
+		} else {
 
-		for (Iterator<Arco<Integer>> iterator = red.obtenerArcos(vertice_actual); iterator.hasNext();) {
-			Arco<Integer> arco = (Arco<Integer>) iterator.next();
-			Integer vertice_ady = arco.getVerticeDestino();
-			int etiqueta = arco.getEtiqueta();
-			String conexion = "E" + vertice_actual + "-E" + vertice_ady;
-			if (!visitados.contains(vertice_ady)) {
-				uf.union(vertice_actual, vertice_ady);
-				km_parcial += etiqueta;
-				camino.add(conexion);	
+			Tunel tunel_actual = estado.removeTunel();
 
-				_back(vertice_ady, uf, visitados, camino, km_parcial);
+			_back(estado, conexion_parcial, conexion_final, km_parcial);
 
-				km_parcial -= etiqueta;
-				uf.union(vertice_actual, vertice_ady);
-				camino.remove(camino.size() - 1);
+			if (estado.estacionesHabilitadas(tunel_actual)) {
+				estado.addUnion(tunel_actual.getOrigen(), tunel_actual.getDestino());
+				km_parcial += tunel_actual.getEtiqueta();
+				conexion_parcial.add(tunel_actual);
+				boolean saco_origen = estado.removeEstacion(tunel_actual.getOrigen());
+				boolean saco_destino = estado.removeEstacion(tunel_actual.getDestino());
+
+				_back(estado, conexion_parcial, conexion_final, km_parcial);
+
+				if (saco_origen) {
+					estado.agregarEstacion(tunel_actual.getOrigen());
+				}
+				if (saco_destino) {
+					estado.agregarEstacion(tunel_actual.getDestino());
+				}
+				conexion_parcial.remove(conexion_parcial.size() - 1);
+				km_parcial -= tunel_actual.getEtiqueta();
+				estado.addUnion(tunel_actual.getOrigen(), tunel_actual.getDestino());
+			} else {
+				_back(estado, conexion_parcial, conexion_final, km_parcial);
 			}
+
+			estado.addTunel(tunel_actual);
 		}
 
-		visitados.remove(visitados.size() - 1);
-
-	}
-
-	/**
-	 * Verifica si todos los vértices están conectados
-	 * 
-	 * @param uf Uinon Find
-	 * @return true si todos estan conectados.
-	 */
-	private boolean todosLosVerticesEstanConectados(UnionFind uf) {
-		int raiz = uf.find(1); // Encuentra la raíz del primer vértice
-		for (int i = 2; i < cant_vertices + 1; i++) {
-			if (uf.find(i) != raiz) {
-				return false;// No todos los vértices están conectados
-			}
-		}
-		return true;
 	}
 
 	public int getKm() {
 		return this.km;
+	}
+
+	public int getItereaciones() {
+		return this.iteraciones;
 	}
 
 }

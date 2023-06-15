@@ -1,9 +1,6 @@
 package tudai.prog3.algoritmo;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import tudai.prog3.colecciones.Grafo;
 
 /**
  * 
@@ -11,15 +8,11 @@ import tudai.prog3.colecciones.Grafo;
  *
  */
 public class Greedy {
-	private Grafo<Integer> red;
 	private int cant_vertices;
 	private int km;
 	private List<String> camino_final;
 
-	public Greedy(Grafo<Integer> red) {
-		this.red = red;
-		this.cant_vertices = red.cantidadVertices();
-		this.camino_final = new ArrayList<String>();
+	public Greedy() {
 	}
 
 	public int getKm() {

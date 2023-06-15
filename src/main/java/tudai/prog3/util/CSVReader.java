@@ -6,8 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import tudai.prog3.colecciones.Grafo;
-import tudai.prog3.colecciones.GrafoDirigido;
+import tudai.prog3.colecciones.Estado;
 
 /**
  * 
@@ -22,8 +21,8 @@ public class CSVReader {
 		this.path = path;
 	}
 
-	public Grafo<Integer> read() {
-		Grafo<Integer> red = new GrafoDirigido<Integer>();
+	public Estado read() {
+		Estado estado = new Estado();
 		// Obtengo una lista con las lineas del archivo
 		// lines.get(0) tiene la primer linea del archivo
 		// lines.get(1) tiene la segunda linea del archivo... y así
@@ -34,10 +33,11 @@ public class CSVReader {
 			Integer destino = Integer.parseInt(line[1].trim().substring(1));
 			Integer etiqueta = Integer.parseInt(line[2].trim());
 			// Aca instanciar lo que necesiten en base a los datos leidos
-			//System.out.println("Origen: " + origen + " Destinto: " + destino + " Etiqueca: " + etiqueta);
-			red.agregarArco(origen, destino, etiqueta);
+			// System.out.println("Origen: " + origen + " Destinto: " + destino + "
+			// Etiqueca: " + etiqueta);
+			estado.add(origen, destino, etiqueta);
 		}
-		return red;
+		return estado;
 	}
 
 	private ArrayList<String[]> readContent() {

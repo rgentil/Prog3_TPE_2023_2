@@ -25,6 +25,7 @@ package tudai.prog3.util;
 public class UnionFind {
 	private int[] padre;
 	private int[] rango;
+	private int cantEstaciones;
 
 	/**
 	 * Constructor de la clase
@@ -32,9 +33,10 @@ public class UnionFind {
 	 * @param cantEstaciones Cantidad de estaciones que contiene la red
 	 */
 	public UnionFind(int cantEstaciones) {
-		padre = new int[cantEstaciones];
-		rango = new int[cantEstaciones];
-		for (int i = 1; i < cantEstaciones; i++) {
+		this.cantEstaciones = cantEstaciones + 1;
+		padre = new int[this.cantEstaciones];
+		rango = new int[this.cantEstaciones];
+		for (int i = 1; i < this.cantEstaciones; i++) {
 			padre[i] = i;
 			rango[i] = 0;
 		}
@@ -60,17 +62,33 @@ public class UnionFind {
 	 * @param estacion2 Estación destino
 	 */
 	public void union(int estacion1, int estacion2) {
-		int rootX = find(estacion1);
-		int rootY = find(estacion2);
-		if (rootX != rootY) {
-			if (rango[rootX] < rango[rootY]) {
-				padre[rootX] = rootY;
-			} else if (rango[rootX] > rango[rootY]) {
-				padre[rootY] = rootX;
+		int raiz1 = find(estacion1);
+		int raiz2 = find(estacion2);
+		if (raiz1 != raiz2) {
+			if (rango[raiz1] < rango[raiz2]) {
+				padre[raiz1] = raiz2;
+			} else if (rango[raiz1] > rango[raiz2]) {
+				padre[raiz2] = raiz1;
 			} else {
-				padre[rootY] = rootX;
-				rango[rootX]++;
+				padre[raiz2] = raiz1;
+				rango[raiz1]++;
 			}
 		}
+	}
+
+	/**
+	 * Verifica si todos los vértices están conectados
+	 * 
+	 * @param uf Uinon Find
+	 * @return true si todos estan conectados.
+	 */
+	public boolean coneccionCompleta() {
+		int raiz = find(1); // Encuentra la raíz del primer vértice
+		for (int i = 2; i < this.cantEstaciones; i++) {
+			if (find(i) != raiz) {
+				return false;// No todos los vértices están conectados
+			}
+		}
+		return true;
 	}
 }
