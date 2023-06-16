@@ -44,7 +44,7 @@ public class Estado {
 		estaciones.remove(t.getOrigen());
 		estaciones.remove(t.getDestino());
 	}
-	
+
 	public boolean removeEstacion(Integer e) {
 		return estaciones.remove(e);
 	}
@@ -70,7 +70,7 @@ public class Estado {
 
 	public void imprimir(List<Tunel> caminoBack) {
 		System.out.println("Camino");
-		for (Tunel t : tuneles) {
+		for (Tunel t : caminoBack) {
 			System.out.print("E" + t.getOrigen() + "-E" + t.getDestino() + " ");
 		}
 		System.out.println("");
@@ -80,4 +80,12 @@ public class Estado {
 		return estaciones.contains(tunel_actual.getOrigen()) || estaciones.contains(tunel_actual.getDestino());
 	}
 
+	public int getCantidadTuneles() {
+		return this.tuneles.size();
+	}
+
+	public List<Tunel> getTuneles(){
+		return this.tuneles;
+	}
+	
 }

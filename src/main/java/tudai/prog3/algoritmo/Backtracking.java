@@ -22,21 +22,27 @@ public class Backtracking {
 		this.iteraciones = 0;
 		this.km = Integer.MAX_VALUE;
 
-		List<Tunel> conexion_final = new ArrayList<Tunel>();
-		List<Tunel> conexion_parcial = new ArrayList<Tunel>();
+		List<Tunel> tuneles_visitados = new ArrayList<Tunel>();
+		List<Integer> estaciones_conectadas = new ArrayList<Integer>();
 
-		_back(estado, conexion_parcial, conexion_final, 0);
+		List<Tunel> conexion_parcial = new ArrayList<Tunel>();
+		List<Tunel> conexion_final = new ArrayList<Tunel>();
+		int km_parcial = 0;
+
+		_back(estado, tuneles_visitados, estaciones_conectadas, conexion_parcial, conexion_final, km_parcial);
 
 		return conexion_final;
 	}
 
-	private void _back(Estado estado, List<Tunel> conexion_parcial, List<Tunel> conexion_final, int km_parcial) {
+	private void _back(Estado estado, List<Tunel> tuneles_visitados, List<Integer> estaciones_conectadas,
+			List<Tunel> conexion_parcial, List<Tunel> conexion_final, int km_parcial) {
+		// Contador de veces que itera la recursión
 		iteraciones++;
 
-		if (estado.sinTuneles()) {
-			if (estado.sinEstaciones()) {
-				if (estado.coneccionCompleta()) {
-					if (km_parcial <= this.km) {
+		if (tuneles_visitados.size() == estado.getCantidadTuneles()) {// Si se vesitaron todos los tuneles
+			if (estaciones_conectadas.size() == estado.getCantidadEstaciones()) {// Si se usaron todas las estaciones
+				if (estado.coneccionCompleta()) {// Si todas las estaciones quedaron conectadoas.
+					if (km_parcial < this.km) {// Se guarda el camino más corto en total de kms.
 						conexion_final.clear();
 						conexion_final.addAll(conexion_parcial);
 						km = km_parcial;
@@ -44,36 +50,75 @@ public class Backtracking {
 				}
 			}
 		} else {
+			// Se van usar todos los tuneles para encontrar el camino óptimo.
+			for (Tunel tunel_actual : estado.getTuneles()) {
+				if (!tuneles_visitados.contains(tunel_actual)) {
+					// Para no volver a usar un mismo tunel.
+					tuneles_visitados.add(tunel_actual);
 
-			Tunel tunel_actual = estado.removeTunel();
+					// Datos del tunel actual.
+					Integer origen = tunel_actual.getOrigen();
+					Integer destino = tunel_actual.getDestino();
+					Integer etiqueta = tunel_actual.getEtiqueta();
 
-			_back(estado, conexion_parcial, conexion_final, km_parcial);
+					// Si el tunel conecta alguna estación que no se haya conectado, ya sea
+					// origen o destino, ese tunel se puede usar para la solución.
+					if (!estaciones_conectadas.contains(origen) || !estaciones_conectadas.contains(destino)) {
 
-			if (estado.estacionesHabilitadas(tunel_actual)) {
-				estado.addUnion(tunel_actual.getOrigen(), tunel_actual.getDestino());
-				km_parcial += tunel_actual.getEtiqueta();
-				conexion_parcial.add(tunel_actual);
-				boolean saco_origen = estado.removeEstacion(tunel_actual.getOrigen());
-				boolean saco_destino = estado.removeEstacion(tunel_actual.getDestino());
+						// Variables locales al método usadas al momento de volver de la recursión y
+						// sacar la estación de la lista de estaciones conectadas.
+						boolean marco_origen = false;
+						boolean marco_destino = false;
 
-				_back(estado, conexion_parcial, conexion_final, km_parcial);
+						// Si destino y/u origen no se han conectado se conectan
+						if (!estaciones_conectadas.contains(origen)) {
+							marco_origen = true;
+							estaciones_conectadas.add(origen);
+						}
 
-				if (saco_origen) {
-					estado.agregarEstacion(tunel_actual.getOrigen());
+						if (!estaciones_conectadas.contains(destino)) {
+							marco_destino = true;
+							estaciones_conectadas.add(destino);
+						}
+
+						// Usa algoritmo union-find para agrupar en un conjunto al origen y al destino y
+						// luego poder verificar si todas las estaciones fueron conectadas.
+						estado.addUnion(origen, destino);
+
+						// Actualiza los datos para el siguiente estado.
+						km_parcial += etiqueta;
+						conexion_parcial.add(tunel_actual);
+
+						_back(estado, tuneles_visitados, estaciones_conectadas, conexion_parcial, conexion_final,
+								km_parcial);
+
+						// Cuando vuelve la recursión tomando la desicción de usar el tunel actual en la
+						// posible solucion, se desasen los cambios para volver a llamar recursivamente
+						// sin usar el tunel actual.
+						if (marco_origen) {
+							marco_origen = false;
+							estaciones_conectadas.remove(origen);
+						}
+
+						if (marco_destino) {
+							marco_destino = false;
+							estaciones_conectadas.remove(destino);
+						}
+
+						conexion_parcial.remove(tunel_actual);
+						km_parcial -= etiqueta;
+						estado.addUnion(origen, destino);
+
+						_back(estado, tuneles_visitados, estaciones_conectadas, conexion_parcial, conexion_final,
+								km_parcial);
+
+					}
+
+					tuneles_visitados.remove(tuneles_visitados.size() - 1);
 				}
-				if (saco_destino) {
-					estado.agregarEstacion(tunel_actual.getDestino());
-				}
-				conexion_parcial.remove(conexion_parcial.size() - 1);
-				km_parcial -= tunel_actual.getEtiqueta();
-				estado.addUnion(tunel_actual.getOrigen(), tunel_actual.getDestino());
-			} else {
-				_back(estado, conexion_parcial, conexion_final, km_parcial);
 			}
 
-			estado.addTunel(tunel_actual);
 		}
-
 	}
 
 	public int getKm() {
@@ -83,5 +128,4 @@ public class Backtracking {
 	public int getItereaciones() {
 		return this.iteraciones;
 	}
-
 }

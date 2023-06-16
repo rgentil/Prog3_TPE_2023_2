@@ -73,6 +73,8 @@ public class UnionFind {
 				padre[raiz2] = raiz1;
 				rango[raiz1]++;
 			}
+		}else {
+			padre[estacion2] = estacion2;
 		}
 	}
 
