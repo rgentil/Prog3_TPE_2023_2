@@ -89,8 +89,11 @@ public class Backtracking {
 						km_parcial += etiqueta;
 						conexion_parcial.add(tunel_actual);
 
+						// if (marco_origen || marco_destino) {// Poda, hay alguna estacion sin
+						// conectar.
 						_back(estado, tuneles_visitados, estaciones_conectadas, conexion_parcial, conexion_final,
 								km_parcial);
+						// }
 
 						// Cuando vuelve la recursión tomando la desicción de usar el tunel actual en la
 						// posible solucion, se desasen los cambios para volver a llamar recursivamente
@@ -113,11 +116,9 @@ public class Backtracking {
 								km_parcial);
 
 					}
-
 					tuneles_visitados.remove(tuneles_visitados.size() - 1);
 				}
 			}
-
 		}
 	}
 
