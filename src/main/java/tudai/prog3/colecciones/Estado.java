@@ -1,6 +1,7 @@
 package tudai.prog3.colecciones;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import tudai.prog3.util.UnionFind;
@@ -10,21 +11,28 @@ public class Estado {
 	private List<Tunel> tuneles;
 	private List<Integer> estaciones;
 	private UnionFind uf;
+	private HashMap<Tunel, Boolean> tuneles_visitados;
+	private HashMap<Integer, Boolean> estaciones_conectadas;
 
 	public Estado() {
 		this.tuneles = new ArrayList<Tunel>();
 		this.estaciones = new ArrayList<Integer>();
+		this.tuneles_visitados = new HashMap<Tunel, Boolean>();
+		this.estaciones_conectadas = new HashMap<Integer, Boolean>();
 	}
 
 	public void add(Integer origen, Integer destino, Integer etiqueta) {
-		tuneles.add(new Tunel(origen, destino, etiqueta));
+		Tunel tunel = new Tunel(origen, destino, etiqueta);
+		tuneles.add(tunel);
+		tuneles_visitados.put(tunel, false);
 		agregarEstacion(origen);
 		agregarEstacion(destino);
 	}
 
-	public void agregarEstacion(Integer e) {
-		if (!estaciones.contains(e)) {
-			estaciones.add(e);
+	public void agregarEstacion(Integer estacion) {
+		if (!estaciones.contains(estacion)) {
+			estaciones.add(estacion);
+			estaciones_conectadas.put(estacion, false);
 		}
 	}
 
@@ -32,40 +40,19 @@ public class Estado {
 		return estaciones.size();
 	}
 
-	public Tunel removeTunel() {
-		return tuneles.remove(0);
-	}
-
-	public void addTunel(Tunel tunel) {
-		tuneles.add(0, tunel);
-	}
-
-	public void removeEstacion(Tunel t) {
-		estaciones.remove(t.getOrigen());
-		estaciones.remove(t.getDestino());
-	}
-
-	public boolean removeEstacion(Integer e) {
-		return estaciones.remove(e);
-	}
-
 	public void addUnion(Integer origen, Integer destino) {
 		if (this.uf == null) {
 			this.uf = new UnionFind(this.getCantidadEstaciones());
 		}
-		this.uf.union(origen, destino);
+		this.uf.union(origen - 1, destino - 1);
+	}
+
+	public void split(Integer origen, Integer destino) {
+		this.uf.split(getCantidadEstaciones(), getCantidadEstaciones());
 	}
 
 	public boolean coneccionCompleta() {
-		return this.uf.coneccionCompleta();
-	}
-
-	public boolean sinTuneles() {
-		return (tuneles == null || tuneles.size() == 0);
-	}
-
-	public boolean sinEstaciones() {
-		return (estaciones == null || estaciones.size() == 0);
+		return this.uf.connected();
 	}
 
 	public void imprimir(List<Tunel> caminoBack) {
@@ -76,16 +63,42 @@ public class Estado {
 		System.out.println("");
 	}
 
-	public boolean estacionesHabilitadas(Tunel tunel_actual) {
-		return estaciones.contains(tunel_actual.getOrigen()) || estaciones.contains(tunel_actual.getDestino());
-	}
-
-	public int getCantidadTuneles() {
-		return this.tuneles.size();
-	}
-
-	public List<Tunel> getTuneles(){
+	public List<Tunel> getTuneles() {
 		return this.tuneles;
 	}
-	
+
+	public boolean tunelesTodosVisitados() {
+		for (boolean valor : tuneles_visitados.values()) {
+			if (!valor) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean estacionesTodasConectadas() {
+		for (boolean valor : estaciones_conectadas.values()) {
+			if (!valor) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	public boolean tunelVisitado(Tunel tunel) {
+		return tuneles_visitados.get(tunel);
+	}
+
+	public boolean estacionConectada(Integer estacion) {
+		return estaciones_conectadas.get(estacion);
+	}
+
+	public void setTunelVisitado(Tunel tunel, boolean b) {
+		tuneles_visitados.put(tunel, b);
+	}
+
+	public void setEstacionConectada(Integer estacion, boolean b) {
+		estaciones_conectadas.put(estacion, b);
+	}
+
 }

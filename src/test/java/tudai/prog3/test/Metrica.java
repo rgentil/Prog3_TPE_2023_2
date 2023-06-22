@@ -16,7 +16,7 @@ public class Metrica {
 
 	public void generarSolucion(int i) {
 		System.out.println("Dataset " + i);
-		String path = "src/main/recursos/datasets/dataset" + i + ".txt";
+		String path = "src/main/recursos/datasets/dataset" + 0 + ".txt";
 		CSVReader reader = new CSVReader(path);
 		Estado estado = reader.read();
 		System.out.println("Backtracking");
@@ -28,6 +28,9 @@ public class Metrica {
 		estado.imprimir(caminoBack);
 		System.out.println(backtracking.getKm() + " kms");
 		System.out.println("Cantidad de iteraciones: " + backtracking.getItereaciones());
+
+		System.out.println("Iteraciones_solucion: " + backtracking.getItereacionesSolucion());
+
 		System.out.println("Prueba time: " + tiempo);
 	}
 }

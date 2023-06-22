@@ -33,7 +33,7 @@ public class UnionFind {
 	 * @param cantEstaciones Cantidad de estaciones que contiene la red
 	 */
 	public UnionFind(int cantEstaciones) {
-		this.cantEstaciones = cantEstaciones + 1;
+		this.cantEstaciones = cantEstaciones;
 		padre = new int[this.cantEstaciones];
 		rango = new int[this.cantEstaciones];
 		for (int i = 1; i < this.cantEstaciones; i++) {
@@ -73,8 +73,20 @@ public class UnionFind {
 				padre[raiz2] = raiz1;
 				rango[raiz1]++;
 			}
-		}else {
+		} else {
 			padre[estacion2] = estacion2;
+		}
+
+	}
+
+	public void split(int x, int y) {
+		int rootX = find(x);
+		int rootY = find(y);
+
+		if (rootX == rootY) {
+			padre[x] = x;
+			padre[y] = y;
+			rango[rootX] -= 2;
 		}
 	}
 
@@ -84,9 +96,9 @@ public class UnionFind {
 	 * @param uf Uinon Find
 	 * @return true si todos estan conectados.
 	 */
-	public boolean coneccionCompleta() {
-		int raiz = find(1); // Encuentra la raíz del primer vértice
-		for (int i = 2; i < this.cantEstaciones; i++) {
+	public boolean connected() {
+		int raiz = find(0); // Encuentra la raíz del primer vértice
+		for (int i = 1; i < this.cantEstaciones; i++) {
 			if (find(i) != raiz) {
 				return false;// No todos los vértices están conectados
 			}
