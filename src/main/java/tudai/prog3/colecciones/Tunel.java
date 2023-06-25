@@ -1,15 +1,12 @@
 package tudai.prog3.colecciones;
 
-import java.util.Objects;
-
-public class Tunel {
+public class Tunel implements Comparable<Tunel> {
 
 	private Integer origen;
 	private Integer destino;
 	private Integer etiqueta;
 
 	public Tunel(Integer origen, Integer destino, Integer etiqueta) {
-		super();
 		this.origen = origen;
 		this.destino = destino;
 		this.etiqueta = etiqueta;
@@ -28,21 +25,11 @@ public class Tunel {
 	}
 
 	@Override
-	public int hashCode() {
-		return Objects.hash(destino, etiqueta, origen);
+	public int compareTo(Tunel t) {
+		if (this.getEtiqueta() > t.getEtiqueta())
+			return 1;
+		if (this.getEtiqueta() < t.getEtiqueta())
+			return -1;
+		return 0;
 	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Tunel other = (Tunel) obj;
-		return Objects.equals(destino, other.destino) && Objects.equals(etiqueta, other.etiqueta)
-				&& Objects.equals(origen, other.origen);
-	}
-
 }

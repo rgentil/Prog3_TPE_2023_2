@@ -23,9 +23,9 @@ package tudai.prog3.util;
  */
 
 public class UnionFind {
+
 	private int[] padre;
 	private int[] rango;
-	private int cantEstaciones;
 
 	/**
 	 * Constructor de la clase
@@ -33,13 +33,34 @@ public class UnionFind {
 	 * @param cantEstaciones Cantidad de estaciones que contiene la red
 	 */
 	public UnionFind(int cantEstaciones) {
-		this.cantEstaciones = cantEstaciones;
-		padre = new int[this.cantEstaciones];
-		rango = new int[this.cantEstaciones];
-		for (int i = 1; i < this.cantEstaciones; i++) {
+		padre = new int[cantEstaciones + 1];
+		rango = new int[cantEstaciones + 1];
+		for (int i = 1; i < cantEstaciones; i++) {
 			padre[i] = i;
 			rango[i] = 0;
 		}
+	}
+
+	public UnionFind(UnionFind o) {
+		int[] old_padre = o.getPadre();
+		padre = new int[old_padre.length];
+		for (int i = 0; i < old_padre.length; i++) {
+			padre[i] = old_padre[i];
+		}
+
+		int[] old_rango = o.getRango();
+		rango = new int[old_rango.length];
+		for (int i = 0; i < old_rango.length; i++) {
+			rango[i] = old_rango[i];
+		}
+	}
+
+	public int[] getPadre() {
+		return this.padre;
+	}
+
+	public int[] getRango() {
+		return this.rango;
 	}
 
 	/**
@@ -56,8 +77,8 @@ public class UnionFind {
 	}
 
 	/**
-	 * Metodo que uno dos vértices del grafo
-	 * 
+	 * Algoritmo que uno dos vértices del grafo
+	 *
 	 * @param estacion1 Estación origen
 	 * @param estacion2 Estación destino
 	 */
@@ -73,36 +94,35 @@ public class UnionFind {
 				padre[raiz2] = raiz1;
 				rango[raiz1]++;
 			}
-		} else {
-			padre[estacion2] = estacion2;
-		}
-
-	}
-
-	public void split(int x, int y) {
-		int rootX = find(x);
-		int rootY = find(y);
-
-		if (rootX == rootY) {
-			padre[x] = x;
-			padre[y] = y;
-			rango[rootX] -= 2;
 		}
 	}
 
 	/**
-	 * Verifica si todos los vértices están conectados
-	 * 
-	 * @param uf Uinon Find
+	 * Verifica si todos los elementos están conectados
+	 *
 	 * @return true si todos estan conectados.
 	 */
-	public boolean connected() {
-		int raiz = find(0); // Encuentra la raíz del primer vértice
-		for (int i = 1; i < this.cantEstaciones; i++) {
+	public boolean conexionCompleta() {
+		int raiz = find(1); // Encuentra la raíz del primer vértice
+		for (int i = 2; i < this.padre.length; i++) {
 			if (find(i) != raiz) {
 				return false;// No todos los vértices están conectados
 			}
 		}
 		return true;
 	}
+
+	/**
+	 * Verifica si dos estaciones se encuentran en el mismo conjunto o componente
+	 * 
+	 * @param x
+	 * @param y
+	 * @return true si x e y poseen la misma raíz
+	 */
+	public boolean sameSet(int x, int y) {
+		if (find(x) == find(y))
+			return true;
+		return false;
+	}
+
 }

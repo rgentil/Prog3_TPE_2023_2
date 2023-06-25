@@ -1,104 +1,218 @@
 package tudai.prog3.colecciones;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import tudai.prog3.util.UnionFind;
 
 public class Estado {
 
-	private List<Tunel> tuneles;
-	private List<Integer> estaciones;
+	private HashSet<Integer> estaciones_a_conectar;
+	private List<Tunel> tuneles_disponibles;
+	private int km_disponibles;
+
+	private List<Tunel> tuneles_seleccionados;
+	private int km_seleccionados;
 	private UnionFind uf;
-	private HashMap<Tunel, Boolean> tuneles_visitados;
-	private HashMap<Integer, Boolean> estaciones_conectadas;
 
 	public Estado() {
-		this.tuneles = new ArrayList<Tunel>();
-		this.estaciones = new ArrayList<Integer>();
-		this.tuneles_visitados = new HashMap<Tunel, Boolean>();
-		this.estaciones_conectadas = new HashMap<Integer, Boolean>();
+		this.estaciones_a_conectar = new HashSet<>();
+		this.tuneles_disponibles = new ArrayList<>();
 	}
+
+	public void inicializar() {
+		this.tuneles_seleccionados = new ArrayList<>();
+		this.km_seleccionados = 0;
+		this.uf = new UnionFind(this.estaciones_a_conectar.size());
+	}
+
+	/**
+	 * Método add:
+	 *
+	 * Utilizado por el servicio a través del CSVReader como manera de almacenar la
+	 * información de entrada. a) Crea un objeto Túnel con la información recibida
+	 * (origen, destino, etiqueta -km-) que es almacenado en la lista de túneles
+	 * disponibles. b) Almacena las estaciones origen y destino recibidas como
+	 * entrada en un conjunto de estaciones a conectar c) Actualiza el kilometraje
+	 * total de los túneles disponibles
+	 *
+	 *
+	 * @param origen   integer que representa la estacion origen
+	 * @param destino  integer que representa de la estacion origen
+	 * @param etiqueta integer que representa la distancia en kilómetros desde la
+	 *                 estación origen a la estación destino
+	 */
 
 	public void add(Integer origen, Integer destino, Integer etiqueta) {
-		Tunel tunel = new Tunel(origen, destino, etiqueta);
-		tuneles.add(tunel);
-		tuneles_visitados.put(tunel, false);
-		agregarEstacion(origen);
-		agregarEstacion(destino);
+		this.tuneles_disponibles.add(new Tunel(origen, destino, etiqueta));
+		this.estaciones_a_conectar.add(origen);
+		this.estaciones_a_conectar.add(destino);
+		this.km_disponibles += etiqueta;
 	}
 
-	public void agregarEstacion(Integer estacion) {
-		if (!estaciones.contains(estacion)) {
-			estaciones.add(estacion);
-			estaciones_conectadas.put(estacion, false);
+	public int getCantidadEstacionesAConectar() {
+		return this.estaciones_a_conectar.size();
+	}
+
+	public List<Tunel> getTunelesDisponibles() {
+		return this.tuneles_disponibles;
+	}
+
+	public int getKmDisponibles() {
+		return this.km_disponibles;
+	}
+
+	public List<Tunel> getTunelesSeleccionados() {
+		return this.tuneles_seleccionados;
+	}
+
+	public int getKmSeleccionados() {
+		return this.km_seleccionados;
+	}
+
+	public UnionFind getUnionFind() {
+		return this.uf;
+	}
+
+	public int getCantidadTunelesSeleccionados() {
+		return this.tuneles_seleccionados.size();
+	}
+
+	public void setTunelesSeleccionados(List<Tunel> tuneles) {
+		this.tuneles_seleccionados = tuneles;
+	}
+
+	public void setKmSeleccionados(Integer v) {
+		this.km_seleccionados = v;
+	}
+
+	public void setUnionFind(UnionFind o) {
+		this.uf = new UnionFind(o);
+	}
+
+	/**
+	 * Método addTunel:
+	 *
+	 * Inserta al inicio de la lista de túneles disponibles el objeto recibido por
+	 * parámetro Actualiza los kilómetros totales de la lista
+	 *
+	 * @param t tunel
+	 */
+	public void addTunel(Tunel t) {
+		this.tuneles_disponibles.add(0, t);
+		this.km_disponibles += t.getEtiqueta();
+	}
+
+	/**
+	 * Método obtenerTunelDisponible:
+	 *
+	 * Elimina y retorna el primer elemento de la lista de túneles disponibles
+	 * Actualiza los kilómetros de la lista
+	 *
+	 * @return t tunel extraído de la lista de túneles disponible
+	 */
+	public Tunel obtenerTunelDisponible() {
+		Tunel t = this.tuneles_disponibles.remove(0);
+		this.km_disponibles -= t.getEtiqueta();
+		return t;
+	}
+
+	/**
+	 * Método seleccionar:
+	 *
+	 * Agrega un túnel a la lista de túneles seleccionados Actualiza los kilómetros
+	 * totales de la lista
+	 *
+	 * @param t tunel
+	 */
+	public void seleccionar(Tunel t) {
+		this.tuneles_seleccionados.add(t);
+		this.km_seleccionados += t.getEtiqueta();
+	}
+
+	/**
+	 * Método deshacerSelección:
+	 *
+	 * Elimina el túnel recibido por parámetro de la lista de túneles seleccionados
+	 * Actualiza los kilómetros de la lista
+	 *
+	 * @param t túnel
+	 */
+	public void deshacerSeleccion(Tunel t) {
+		this.tuneles_seleccionados.remove(t);
+		this.km_seleccionados -= t.getEtiqueta();
+	}
+
+	/**
+	 * Método conectarEstaciones:
+	 *
+	 * Utiliza Union Find para asociar dos elementos que aún no corresponden a un
+	 * mismo conjunto, referenciándolos al mismo padre
+	 *
+	 * @param a integer que representa la estación origen
+	 * @param b integer que representa la estación destino
+	 */
+	public void conectarEstaciones(Integer a, Integer b) {
+		this.uf.union(a, b);
+	}
+
+	/**
+	 * Método estanConectadas:
+	 *
+	 * Utiliza Union Find para verificar si dos elementos integran un mismo conjunto
+	 * o referencian al mismo padre
+	 *
+	 * @param a integer primer elemento
+	 * @param b integer segundo elemento
+	 *
+	 * @return true si dos elementos pertenecen a un mismo conjunto, false en caso
+	 *         contrario
+	 */
+	public boolean estanConectadas(Integer a, Integer b) {
+		return this.uf.sameSet(a, b);
+	}
+
+	/**
+	 * Método conexionCompleta:
+	 *
+	 * Utiliza Union Find para verificar si todos los elementos pertenecen a un
+	 * mismo conjunto o comparten una misma raíz
+	 *
+	 * @return true si todos los elementos integran un mismo conjunto, false en caso
+	 *         contrario
+	 */
+	public boolean conexionCompleta() {
+		return this.uf.conexionCompleta();
+	}
+
+	public boolean hayTunelesDisponibles() {
+		return this.tuneles_disponibles.size() > 0;
+	}
+
+	private String tunelesToString(List<Tunel> list) {
+		Iterator<Tunel> it = list.iterator();
+		if (!it.hasNext())
+			return "[]";
+
+		StringBuilder sb = new StringBuilder();
+		for (;;) {
+			Tunel t = it.next();
+			sb.append("E").append(t.getOrigen()).append("-E").append(t.getDestino());
+			if (!it.hasNext())
+				return sb.toString();
+			sb.append(',').append(' ');
 		}
 	}
 
-	public int getCantidadEstaciones() {
-		return estaciones.size();
+	public String tunelesSeleccionadosToString() {
+		return this.tunelesToString(this.tuneles_seleccionados);
 	}
 
-	public void addUnion(Integer origen, Integer destino) {
-		if (this.uf == null) {
-			this.uf = new UnionFind(this.getCantidadEstaciones());
-		}
-		this.uf.union(origen - 1, destino - 1);
-	}
-
-	public void split(Integer origen, Integer destino) {
-		this.uf.split(getCantidadEstaciones(), getCantidadEstaciones());
-	}
-
-	public boolean coneccionCompleta() {
-		return this.uf.connected();
-	}
-
-	public void imprimir(List<Tunel> caminoBack) {
-		System.out.println("Camino");
-		for (Tunel t : caminoBack) {
-			System.out.print("E" + t.getOrigen() + "-E" + t.getDestino() + " ");
-		}
-		System.out.println("");
-	}
-
-	public List<Tunel> getTuneles() {
-		return this.tuneles;
-	}
-
-	public boolean tunelesTodosVisitados() {
-		for (boolean valor : tuneles_visitados.values()) {
-			if (!valor) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public boolean estacionesTodasConectadas() {
-		for (boolean valor : estaciones_conectadas.values()) {
-			if (!valor) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	public boolean tunelVisitado(Tunel tunel) {
-		return tuneles_visitados.get(tunel);
-	}
-
-	public boolean estacionConectada(Integer estacion) {
-		return estaciones_conectadas.get(estacion);
-	}
-
-	public void setTunelVisitado(Tunel tunel, boolean b) {
-		tuneles_visitados.put(tunel, b);
-	}
-
-	public void setEstacionConectada(Integer estacion, boolean b) {
-		estaciones_conectadas.put(estacion, b);
+	public String toString() {
+		return "Estaciones a conectar: " + this.estaciones_a_conectar.toString() + "\nTuneles disponibles: "
+				+ this.tunelesToString(this.tuneles_disponibles) + "\nKms. disponibles: " + this.km_disponibles;
 	}
 
 }

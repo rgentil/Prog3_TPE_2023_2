@@ -17,11 +17,11 @@ public class CSVReader {
 
 	private String path;
 
-	public CSVReader(String path) {
-		this.path = path;
+	public CSVReader() {
 	}
 
-	public Estado read() {
+	public Estado read(String path) {
+		this.path = path;
 		Estado estado = new Estado();
 		// Obtengo una lista con las lineas del archivo
 		// lines.get(0) tiene la primer linea del archivo
@@ -32,9 +32,8 @@ public class CSVReader {
 			Integer origen = Integer.parseInt(line[0].trim().substring(1));
 			Integer destino = Integer.parseInt(line[1].trim().substring(1));
 			Integer etiqueta = Integer.parseInt(line[2].trim());
-			// Aca instanciar lo que necesiten en base a los datos leidos
-			// System.out.println("Origen: " + origen + " Destinto: " + destino + "
-			// Etiqueca: " + etiqueta);
+			// En cada iteración, se delega al estado la creación de un objeto túnel con los
+			// datos actuales
 			estado.add(origen, destino, etiqueta);
 		}
 		return estado;
