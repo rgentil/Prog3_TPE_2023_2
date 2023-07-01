@@ -37,28 +37,39 @@ public class Greedy extends Algoritmo {
 	 *         seleccionados -túneles a construir-, km seleccionados -costo de la
 	 *         solución en km-, cantidad de iteraciones consumidas por el algoritmo)
 	 *
+	 *
+	 *	La complejidad del método hallarRedDeMenorLongitud en el peor caso se
+	 *         puede estimar como O(M log M), donde M es la cantidad de túneles
+	 *         disponibles. Esto se debe al ordenamiento de los túneles disponibles.
+	 *         Sin embargo, si M es mucho menor que N (la cantidad de estaciones),
+	 *         la complejidad puede aproximarse a O(N).
 	 */
 	public Estado hallarRedDeMenorLongitud(Estado estado) {
 
-		estado.inicializar();
-		Collections.sort(estado.getTunelesDisponibles());
+		if (estado.hayEstacionesAConectar() && estado.hayTunelesDisponibles()) {
 
-		this.iteraciones = 0;
+			estado.inicializar();
+			Collections.sort(estado.getTunelesDisponibles());
 
-		while (!estado.conexionCompleta() && estado.hayTunelesDisponibles()) {
-			this.iteraciones++;
-			Tunel tunel = estado.obtenerTunelDisponible();
+			this.iteraciones = 0;
 
-			if (!estado.estanConectadas(tunel.getOrigen(), tunel.getDestino())) {
-				estado.seleccionar(tunel);
-				estado.conectarEstaciones(tunel.getOrigen(), tunel.getDestino());
+			while (!estado.conexionCompleta() && estado.hayTunelesDisponibles()) {
+				this.iteraciones++;
+				Tunel tunel = estado.obtenerTunelDisponible();
+
+				if (!estado.estanConectadas(tunel.getOrigen(), tunel.getDestino())) {
+					estado.seleccionar(tunel);
+					estado.conectarEstaciones(tunel.getOrigen(), tunel.getDestino());
+				}
+
+			}
+
+			if (estado.conexionCompleta()) {
+				return estado;
 			}
 		}
 
-		if (estado.conexionCompleta())
-			return estado;
-		else
-			return null;
+		return null;
 
 	}
 
